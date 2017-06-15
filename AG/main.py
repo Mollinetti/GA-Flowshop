@@ -3,61 +3,29 @@ Created on 01/07/2015
 
 @author: Mollinetti
 '''
-import random, Gene, Parameters, GA
+import random, Gene, Parameters, GA, sys, os
 
 if __name__ == "__main__":
-    
-    #lb = [2, 5, 8]
-    #ub = [4, 7, 10]
-    
-    #p = Parameters.Params(3, 10, True, False, 0.8, 2, 0.05, 0.075, 0.015, lb, ub)
 
-    #init parameters by reading the txt
-    p = Parameters.Params('MWTCS')
-    #init mersenne twister seed
-    random.seed(None,2)
-    
-    ga = GA.GA(p)
-    
-    ga.run()
-    
-    #g = []
-   
-    
-    #for i in range(0, p.popNum):
-        #g.append(Gene.Gene(lb, ub, 3))
-        #ga.population[i].traverse()
-        #ga.evaluate(ga.population[i])
-        #print(ga.population[i].fitness)
+    try:
+        best = []
+        argfile = str(sys.argv[1])
+        #init parameters by reading the txt
+        p = Parameters.Params(argfile)
+        #init mersenne twister seed
+        random.seed(None,2)
+        #check for the outfile
+        if not os.path.exists("Out/C|"+ str(p.machines) + "|" + str(p.jobs)):
+            os.makedirs("Out/C|"+ str(p.machines) + "|" +str(p.jobs))
 
-
-    #print("\n\n SELECTION \n \n \n")
-    #ga.selection()
-    #for i in range(0, len(ga.tnPool)):
-        #ga.tnPool[i].traverse()
-        #print(ga.tnPool[i].fitness)
-
-    #print("\n\nCROSSOVER\n\n\n")
-    #ga.crossover()
-    #for i in range(0, len(ga.tnPool)):
-        #ga.tnPool[i].traverse()
-        #print(i, ':', ga.tnPool[i].fitness)
-
-    #print("\n\nUPDATES\n\n\n")
-    #ga.update()
-    #for i in range(0, p.popNum):
-        #ga.population[i].traverse()
-        #print(ga.population[i].fitness)
-
-    #print("\n\nMUTATION\n\n\n")
-    #ga.mutation()
-
-    #print("\n\nFINAL POPULATION\n\n\n")
-    #for i in range(0, p.popNum):
-        #g.append(Gene.Gene(lb, ub, 3))
-        #ga.population[i].traverse()
-        #print(ga.population[i].fitness)
-
-    #print("\n\nBEST:\n\n", ga.findBest().fitness)
-
-    
+        for i in range(0,int(sys.argv[2])):
+            ga = GA.GA(str(i),p)
+            
+            best.append(ga.run(ga.population,p))
+        f = open("Out/C|"+ str(p.machines) + "|" + str(p.jobs)+'/BESTS','w')
+        for i in range(0, int(len(best))):
+            f.write("%12.10f"%(best[i])+ "\t")
+            f.write("\n")
+        f.close()
+    except IndexError:
+        print("\nRight usage: python3 SIGA.py [Parameter file] [number of executions]\n")

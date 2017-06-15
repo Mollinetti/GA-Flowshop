@@ -4,59 +4,54 @@ Created on 01/07/2015
 @author: Mollinetti
 '''
 
-import util
+import util,random, os
 
 class Params:
     
     def __init__(self, filename):
         with open(filename) as f:
             data = f.read().splitlines()
-        self.dim      = int(data[0])
-        self.popNum   = int(data[1])  
-        self.cRate    = float(data[5])
-        self.tn_size  = int(data[6])
-        self.mRate    = float(data[7])
-        self.hasConst = util.str_to_bool(data[3])
-        self.restrictions = int(data[4])
-        self.isMin    = util.str_to_bool(data[2])
-        self.zeta     = float(data[8])
-        self.dirCoeff = float(data[9])
-        self.generations  = int(data[len(data)-1])
-        line = data[len(data)-4]
-        self.lowBound = line.split()
-        self.lowBound = list(map(float, self.lowBound))
-        line = data[len(data)-3]
-        self.uppBound = line.split()
-        self.uppBound = list(map(float, self.uppBound))
-        self.funcName = data[len(data)-2]
+        self.jobs      = int(data[0])
+        self.machines  =int(data[1])
+        self.popNum   = int(data[2])  
+        self.tn_size  = int(data[3])
+        self.crossover_rate = float(data[4])
+        self.mutation_rate = float(data[5])
+        self.generations  = int(data[6])
+        self.jobBound = int(data[7])
+        #number of individuals to have crossover
+        self.tn_num = int(self.popNum * self.crossover_rate)
+        #check for odd values
+        if self.tn_num%2 != 0:
+            self.tn_num = self.tn_num+1
 
-# def __init__(self, dimension, population, isMin, hasConstraint, crossoverRate, tn_size, mutationRate, zeta, dirCoeff, minimum, maximum):
- #       self.dim      = dimension
-  #      self.popNum   = population 
-   #     self.cRate    = crossoverRate
-    #    self.tn_size  = tn_size
-     #   self.mRate    = mutationRate
-      #  self.hasConst = hasConstraint
-       # self.isMin    = isMin
-        #self.zeta     = zeta
-        #self.dirCoeff = dirCoeff
-        #self.lowBound = minimum
-        #self.uppBound = maximum
-      
+        #processing time list for each job in each machine
+        #ex: 4 jobs, 2 machines
+        #[ [3,2],[1,1],[2,2],[3.3] ]
+        self.joblist = []
+        for i in range(0, self.jobs):
+            self.joblist.append([random.randrange(1,(self.jobBound)+1) for _ in range(self.machines)])
 
-    def getZeta(self):
-        return self.zeta
-    
-    def getcRate(self):
-        return self.cRate
-    
-    def getmRate(self):
-        return self.mRate
-    
-    def getisMin(self):
-        return self.isMin
-    
-    
-    def getdirCoeff(self):
-        return self.dirCoeff
+        #check for the outfile
+        if not os.path.exists("Out/C|"+ str(self.machines) + "|" + str(self.jobs)):
+            os.makedirs("Out/C|"+ str(self.machines) + "|" +str(self.jobs))
+
+        #print experiment report
+        f = open("Out/C|"+ str(self.machines) + "|" + str(self.jobs)+'/Report','w')
+        #f.write("Jobs = "+ str(self.jobs)+ " ranging from [0,"+ str(self.jobBound)+ "]\n")
+        f.write("{:26s}{:>7s}\n".format("Jobs", "{}".format(str(self.jobs)+ " ranging from [0,"+ str(self.jobBound)+ "]")))
+        f.write("{:20s}{:>7s}\n".format("Machines", "{}".format(self.machines)))
+        f.write("{:20s}{:>7s}\n".format("Population", "{}".format(self.popNum)))
+        f.write("{:20s}{:>7s}\n".format("Generations", "{}".format(self.generations)))
+        f.write("{:20s}{:>7s}\n".format("Crossover Rate", "{:.2f}".format(self.crossover_rate)))
+        f.write("{:20s}{:>7s}\n".format("Mutation Rate ", "{:.2f}".format(self.mutation_rate)))
+        f.write("\n")
+        f.write("Joblist:\n")
+        for t in range(0,len(self.joblist)):
+            #f.write(str(self.joblist[i])+"\n")
+            f.write("{:5s}\n".format(str(self.joblist[t])))
+        f.close()
+
+        
+
 
