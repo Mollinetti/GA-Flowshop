@@ -294,9 +294,10 @@ class GA ():
         #write result File
         self.writeResult("Out/C|"+ str(self.param.machines) + "|" + str(self.param.jobs)+"/"+self.outname)
         self.writeBehavior("Out/C|"+ str(self.param.machines) + "|" + str(self.param.jobs)+"/Behavior"+self.outname)
+        b = min(self.bests, key = attrgetter('fitness'))
 
         #return best 
-        return min(self.bests, key = attrgetter('fitness'))
+        return b.fitness
 
 
 
