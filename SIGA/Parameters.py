@@ -21,6 +21,8 @@ class Params:
         line = data[7]
         self.jobBound = line.split()
         self.jobBound = list(map(int, self.jobBound))
+        #seed number
+        self.seed = random.randint(1001,9999)
         #number of individuals to have crossover
         self.tn_num = int(self.popNum * self.crossover_rate)
         #check for odd values
@@ -62,6 +64,7 @@ class Params:
         f.write("{:20s}{:>7s}\n".format("Generations", "{}".format(self.generations)))
         f.write("{:20s}{:>7s}\n".format("Crossover Rate", "{:.2f}".format(self.crossover_rate)))
         f.write("{:20s}{:>7s}\n".format("Mutation Rate ", "{:.2f}".format(self.mutation_rate)))
+        f.write("{:20s}{:>7s}\n".format("Seed ", "{:.2f}".format(self.seed)))
         f.write("\n")
         f.write("Joblist:\n")
         for t in range(0,len(self.joblist)):

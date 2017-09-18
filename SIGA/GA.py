@@ -4,7 +4,7 @@ Created on 01/07/2015
 @author: Mollinetti
 '''
 
-import Parameters, math, copy, random, Gene, KCrossover, Fitness
+import Parameters, math, copy, random, Gene, KCrossover, Fitness, Interaction
 from operator import attrgetter
 from  more_itertools import unique_everseen
 
@@ -23,6 +23,9 @@ class GA ():
 
         #list with every best element
         self.bests = []
+
+        #list holding information on the amount of each behavior in the population
+        self.behavior_ind = []
 
         for _ in range(0, self.param.popNum):
             self.population.append(Gene.Gene(self.param))
@@ -132,9 +135,29 @@ class GA ():
             diff2 = set(list(range(0,param.jobs))) - set(h2+t1)
 
 
-            #initialize offsprings as new clean individuals
+            #type 3:initialize offsprings as new clean individuals
             offspring.append(Gene.Gene(param,type=1))
             offspring.append(Gene.Gene(param, type=1))
+
+            #type 1: offsprings inherit behavior from both parents
+                #offspring[1].probC = self.population[index_pool[i]].probC
+                #offspring[1].probD = self.population[index_pool[i]].probD
+                #offspring[2].probC = self.population[index_pool[i+1]].probC
+                #offspring[2].probD = self.population[index_pool[i+1]].probD
+
+            #type 2: offsprings inherit behavior from the best parent
+            #if self.population[index_pool[i]].socialFitness > self.population[index_pool[i]].socialFitness:
+                #offspring[1].probC = self.population[index_pool[i]].probC
+                #offspring[1].probD = self.population[index_pool[i]].probD
+                #offspring[2].probC = self.population[index_pool[i]].probC
+                #offspring[2].probD = self.population[index_pool[i]].probD
+            #else:
+                #offspring[1].probC = self.population[index_pool[i+1]].probC
+                #offspring[1].probD = self.population[index_pool[i+1]].probD
+                #offspring[2].probC = self.population[index_pool[i+1]].probC
+                #offspring[2].probD = self.population[index_pool[i+1]].probD
+
+          
 
             #append h1+ shuffle(diff1) + t2 
             offspring[i].genotype = h1 + random.sample(diff1,len(diff1)) + t2
@@ -184,8 +207,9 @@ class GA ():
         if param.SIGA_flag == "Yes":
             sort_perm = sorted(population, key = attrgetter('totalFitness'))
 
-        sort_perm = sorted(population, key = attrgetter('fitness'))
+        #sort_perm = sorted(population, key = attrgetter('fitness'))
         #if its a minimization problem pick the least values
+
         sort_perm[param.popNum - param.tn_num:] = list(offspring)
  
         return sort_perm
@@ -208,16 +232,32 @@ class GA ():
         #end it by closing the file\
         f.close()   
 
+    #funtion that writes the behavior of the population
+    def writeBehavior(self, filename):
+        f = open(filename,'w')
+        for i in range(0, int(len(self.behavior_ind))):
+            f.write('{} {} {} {}'.format(self.behavior_ind[i][0],self.behavior_ind[i][1],self.behavior_ind[i][2],self.behavior_ind[i][3]))
+            f.write("\n")
+        #end it by closing the file\
+        f.close()   
+
     #function to run the GA
     def run(self, population, p = Parameters):
         #initial evaluation
         for i in range(0, p.popNum):
             population[i].fitness = self.makespam(population[i].genotype, p)
 
+        if p.SIGA_flag == "Yes":
+            gEngine = Interaction.Interaction(self.param)
+
+            #change the game payment matrix (if necessary)
+            gEngine.change(1)
+
         #main loop   
         for i in range(0, int(p.generations)):
-            
+            gEngine.socialInteraction(self.findBest(population,p).fitness,self.population)
             #selection + crossover
+
             offspring = self.crossover(population,p)
 
             #mutation
@@ -227,17 +267,36 @@ class GA ():
                 population[k].genotype = self.mutation(population[k].genotype, p)
                 population[k].fitness = self.makespam(population[k].genotype, p)
 
+
             population = self.update(population, offspring, p)
 
-        #print(g[len(g)-1].fitness, g[len(g)-1].genotype[0], g[len(g)-1].genotype[1])
+
+            #print(g[len(g)-1].fitness, g[len(g)-1].genotype[0], g[len(g)-1].genotype[1])
             self.bests.append(copy.copy(self.findBest(population,p)))
+
+            #storing information of the behavior of every individual
+            tmp_list = [0,0,0,0]
+            for ik in range(0, self.param.popNum):
+                if population[ik].strat_name == 'ALLC':
+                    tmp_list[0] +=1
+                elif population[ik].strat_name == 'ALLD':
+                    tmp_list[1] +=1
+                elif population[ik].strat_name == 'TFT':
+                    tmp_list[2] +=1
+                else:
+                    tmp_list[3] +=1
+
+            #print(tmp_list)
+            self.behavior_ind.append(tmp_list)
+
 
         
         #write result File
-        self.writeResult("Out/C|"+ str(self.param.machines) + "|" + str(self.param.jobs) + "/" +self.outname)
+        self.writeResult("Out/C|"+ str(self.param.machines) + "|" + str(self.param.jobs)+"/"+self.outname)
+        self.writeBehavior("Out/C|"+ str(self.param.machines) + "|" + str(self.param.jobs)+"/Behavior"+self.outname)
 
         #return best 
-        return self.bests[-1].fitness
+        return min(self.bests, key = attrgetter('fitness'))
 
 
 

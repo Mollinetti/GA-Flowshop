@@ -20,21 +20,26 @@ class Gene():
         if p.SIGA_flag == "Yes":
             self.socialFitness = float(0)
             self.totalFitness = float(0)
+            self.strat_name   = None
 
             #generating strategy profile
             num = random.uniform(0,1)
             if num >= 0 and num < p.allDRate:
-                self.probC = 0.1
-                self.probD = 0.9
+                self.probC = 0.0
+                self.probD = 1.0
+                self.strat_name = "ALLD"
             elif num >= p.allDRate and num < p.allDRate + p.allCRate:
-                self.probC = 0.9
-                self.probD = 0.1
+                self.probC = 1.0
+                self.probD = 0.0
+                self.strat_name = "ALLC"
             elif num >= p.allDRate + p.allCRate and num < p.allDRate + p.allCRate + p.TFTRate: 
                 self.probC = 0.5
                 self.probD = 0.5
+                self.strat_name = "TFT"
             else:
                 self.probC = random.random()
                 self.probD = 1 - self.probC
+                self.strat_name = "RND"
             
         Gene.population +=1
 

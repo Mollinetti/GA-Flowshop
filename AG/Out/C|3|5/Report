@@ -1,0 +1,13 @@
+Jobs                      5 ranging from [3,5]
+Machines                  3
+Population               10
+Generations               4
+Crossover Rate         0.85
+Mutation Rate          0.40
+
+Joblist:
+[3, 5, 5]
+[5, 5, 3]
+[4, 4, 3]
+[5, 4, 3]
+[3, 5, 5]
