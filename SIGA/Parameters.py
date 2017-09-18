@@ -4,7 +4,7 @@ Created on 01/07/2015
 @author: Mollinetti
 '''
 
-import util,random, os
+import random, os
 
 class Params:
     
@@ -22,7 +22,7 @@ class Params:
         self.jobBound = line.split()
         self.jobBound = list(map(int, self.jobBound))
         #seed number
-        self.seed = random.randint(1001,9999)
+        self.seed = random.randint(1001,99999)
         #number of individuals to have crossover
         self.tn_num = int(self.popNum * self.crossover_rate)
         #check for odd values

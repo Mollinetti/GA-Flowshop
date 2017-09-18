@@ -4,7 +4,7 @@ Created on 01/07/2015
 @author: Mollinetti
 '''
 
-import Parameters, math, copy, random, Gene, KCrossover, Fitness, Interaction
+import Parameters, math, copy, random, Gene, KCrossover, Interaction
 from operator import attrgetter
 from  more_itertools import unique_everseen
 
