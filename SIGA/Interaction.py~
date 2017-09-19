@@ -96,7 +96,7 @@ class Interaction:
      #whole social interaction process
 	def socialInteraction(self, bestval, population):
     	
-    	#initialize random list
+    	#initilize random list
 		index = random.sample(range(0, int(self.param.popNum)), int(self.param.popNum))
 
 		#copy of the list 

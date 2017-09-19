@@ -43,20 +43,20 @@ class GA ():
         machine_times[0].append(0)
         for mach in range(1,param.machines):
             # Start the next task in the job when the previous finishes
-            machine_times[mach].append(machine_times[mach-1][0] + param.joblist[permutation[0]][mach-1])
+            machine_times[mach].append(machine_times[mach-1][0] + param.joblist[mach-1][permutation[0]])
 
         # Assign the remaining jobs
         for i in range(1, len(permutation)):
 
             # The first machine never contains any idle time
             job = permutation[i]
-            machine_times[0].append(machine_times[0][-1] + param.joblist[permutation[i-1]][0])
+            machine_times[0].append(machine_times[0][-1] + param.joblist[0][permutation[i-1]])
 
             # For the remaining machines, the start time is the max of when the
             #  previous task in the job completed, or when the current machine
             #  completes the task for the previous job.
             for mach in range(1, param.machines):
-                machine_times[mach].append(max(machine_times[mach-1][i] + param.joblist[permutation[i]][mach-1],machine_times[mach][i-1] + param.joblist[permutation[i-1]][mach]))
+                machine_times[mach].append(max(machine_times[mach-1][i] + param.joblist[mach-1][permutation[i]],machine_times[mach][i-1] + param.joblist[mach][permutation[i-1]]))
 
         return machine_times 
 
@@ -67,7 +67,7 @@ class GA ():
         the earliest start time of any job and the latest completion time of
         any job. Minimizing the makespan amounts to minimizing the total time
         it takes to process all jobs from start to finish."""
-        return self.process_makespam(permutation,param)[-1][-1] + param.joblist[permutation[-1]][-1]
+        return self.process_makespam(permutation,param)[-1][-1] + param.joblist[-1][permutation[-1]]
 
     #function to calculate the total fitness of an individual
     def calculateTotalFitness(self, g = Gene, param = Parameters):

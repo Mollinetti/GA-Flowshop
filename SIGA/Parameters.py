@@ -48,8 +48,16 @@ class Params:
         #ex: 4 jobs, 2 machines
         #[ [3,2],[1,1],[2,2],[3.3] ]
         self.joblist = []
-        for i in range(0, self.jobs):
-            self.joblist.append([random.randrange(self.jobBound[0],(self.jobBound[1])+1) for _ in range(self.machines)])
+        #reading from taillard's benchmark
+        with open(filename+'+instance') as fj:
+            job_read = fj.read().splitlines()
+        for k in range(0, len(job_read)):
+            line = job_read[k]
+            self.joblist.append(line.split())
+            self.joblist[k] = list(map(int, self.joblist[k]))
+
+        #for i in range(0, self.machines):
+            #self.joblist.append([random.randrange(self.jobBound[0],(self.jobBound[1])+1) for _ in range(self.jobs)])
 
         #check for the outfile
         if not os.path.exists("Out/C|"+ str(self.machines) + "|" + str(self.jobs)):
