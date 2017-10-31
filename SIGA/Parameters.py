@@ -13,7 +13,8 @@ class Params:
             data = f.read().splitlines()
         self.jobs      = int(data[0])
         self.machines  =int(data[1])
-        self.popNum   = int(data[2])  
+        self.popNum   = int(data[2])
+        self.popNum   = 100
         self.tn_size  = int(data[3])
         self.crossover_rate = float(data[4])
         self.mutation_rate = float(data[5])
@@ -60,11 +61,11 @@ class Params:
             #self.joblist.append([random.randrange(self.jobBound[0],(self.jobBound[1])+1) for _ in range(self.jobs)])
 
         #check for the outfile
-        if not os.path.exists("Out/C|"+ str(self.machines) + "|" + str(self.jobs)):
-            os.makedirs("Out/C|"+ str(self.machines) + "|" +str(self.jobs))
+        if not os.path.exists("Out/C|"+ str(self.machines) + "|" + str(self.jobs)+ "x"+ str(self.popNum)):
+            os.makedirs("Out/C|"+ str(self.machines) + "|" +str(self.jobs)+ "x"+ str(self.popNum))
 
         #print experiment report
-        f = open("Out/C|"+ str(self.machines) + "|" + str(self.jobs)+'/Report','w')
+        f = open("Out/C|"+ str(self.machines) + "|" + str(self.jobs)+ "x"+ str(self.popNum)+'/Report','w')
         #f.write("Jobs = "+ str(self.jobs)+ " ranging from [0,"+ str(self.jobBound)+ "]\n")
         f.write("{:26s}{:>7s}\n".format("Jobs", "{}".format(str(self.jobs)+ " ranging from ["+ str(self.jobBound[0])+","+ str(self.jobBound[1])+ "]")))
         f.write("{:20s}{:>7s}\n".format("Machines", "{}".format(self.machines)))
@@ -73,6 +74,11 @@ class Params:
         f.write("{:20s}{:>7s}\n".format("Crossover Rate", "{:.2f}".format(self.crossover_rate)))
         f.write("{:20s}{:>7s}\n".format("Mutation Rate ", "{:.2f}".format(self.mutation_rate)))
         f.write("{:20s}{:>7s}\n".format("Seed ", "{:.2f}".format(self.seed)))
+        if self.SIGA_flag == "Yes":
+            f.write("{:20s}{:>7s}\n".format("Alpha ", "{:.2f}".format(self.alpha)))
+            f.write("{:20s}{:>7s}\n".format("Beta ", "{:.2f}".format(self.beta)))
+            f.write("{:20s}{:>7s}\n".format("Games ", "{:.2f}".format(self.numGames)))
+            f.write("{:20s}{:>7s}\n".format("Rounds ", "{:.2f}".format(self.numRounds)))
         f.write("\n")
         f.write("Joblist:\n")
         for t in range(0,len(self.joblist)):

@@ -71,7 +71,7 @@ class GA ():
 
     #function to calculate the total fitness of an individual
     def calculateTotalFitness(self, g = Gene, param = Parameters):
-        g.totalFitness = (param.alpha * g.fitness ) - (param.beta * g.socialFitness)
+        return (param.alpha * g.fitness ) - (param.beta * g.socialFitness)
 
     #return a list with the selected individuals
     def selection(self,permutation, param = Parameters):
@@ -94,20 +94,20 @@ class GA ():
                     #add item 0 to chosen pool and pop it
                     chosen_pool.append(index_pool.pop(0))
             return chosen_pool
+        else:
+            while(len(index_pool) > (param.popNum - param.tn_num)):
 
-        while(len(index_pool) > (param.popNum - param.tn_num)):
-
-            if permutation[index_pool[1]].fitness > permutation[index_pool[0]].fitness:
-                #add item 0 to chosen pool and pop it
-                chosen_pool.append(index_pool.pop(0))
-                #move the first item to the last
-                index_pool.append(index_pool.pop(0))
-            else:
-                #move the first item to the last
-                index_pool.append(index_pool.pop(0))
-                #add item 0 to chosen pool and pop it
-                chosen_pool.append(index_pool.pop(0))
-        return chosen_pool
+                if permutation[index_pool[1]].fitness > permutation[index_pool[0]].fitness:
+                    #add item 0 to chosen pool and pop it
+                    chosen_pool.append(index_pool.pop(0))
+                    #move the first item to the last
+                    index_pool.append(index_pool.pop(0))
+                else:
+                    #move the first item to the last
+                    index_pool.append(index_pool.pop(0))
+                    #add item 0 to chosen pool and pop it
+                    chosen_pool.append(index_pool.pop(0))
+            return chosen_pool
     
 
     #Crossover following ackley's definition
@@ -138,24 +138,30 @@ class GA ():
             #type 3:initialize offsprings as new clean individuals
             offspring.append(Gene.Gene(param,type=1))
             offspring.append(Gene.Gene(param, type=1))
+            # if param.SIGA_flag == "Yes": 
+            #     #type 1: offsprings inherit behavior from both parents
+            #     offspring[0].probC = self.population[index_pool[i]].probC
+            #     offspring[0].probD = self.population[index_pool[i]].probD
+            #     offspring[0].strat_name = self.population[index_pool[i]].strat_name
+            #     offspring[1].probC = self.population[index_pool[i+1]].probC
+            #     offspring[1].probD = self.population[index_pool[i+1]].probD
+            #     offspring[1].strat_name = self.population[index_pool[i+1]].strat_name
 
-            #type 1: offsprings inherit behavior from both parents
-                #offspring[1].probC = self.population[index_pool[i]].probC
-                #offspring[1].probD = self.population[index_pool[i]].probD
-                #offspring[2].probC = self.population[index_pool[i+1]].probC
-                #offspring[2].probD = self.population[index_pool[i+1]].probD
-
-            #type 2: offsprings inherit behavior from the best parent
-            #if self.population[index_pool[i]].socialFitness > self.population[index_pool[i]].socialFitness:
-                #offspring[1].probC = self.population[index_pool[i]].probC
-                #offspring[1].probD = self.population[index_pool[i]].probD
-                #offspring[2].probC = self.population[index_pool[i]].probC
-                #offspring[2].probD = self.population[index_pool[i]].probD
-            #else:
-                #offspring[1].probC = self.population[index_pool[i+1]].probC
-                #offspring[1].probD = self.population[index_pool[i+1]].probD
-                #offspring[2].probC = self.population[index_pool[i+1]].probC
-                #offspring[2].probD = self.population[index_pool[i+1]].probD
+            #type 2: offspring inherit behavior from the best parent
+                # if self.population[index_pool[i]].socialFitness > self.population[index_pool[i]].socialFitness:
+                #     offspring[0].probC = self.population[index_pool[i]].probC
+                #     offspring[0].probD = self.population[index_pool[i]].probD
+                #     offspring[1].probC = self.population[index_pool[i]].probC
+                #     offspring[1].probD = self.population[index_pool[i]].probD
+                #     offspring[0].strat_name = self.population[index_pool[i]].strat_name
+                #     offspring[1].strat_name = self.population[index_pool[i]].strat_name
+                # else:
+                #     offspring[0].probC = self.population[index_pool[i+1]].probC
+                #     offspring[0].probD = self.population[index_pool[i+1]].probD
+                #     offspring[1].probC = self.population[index_pool[i+1]].probC
+                #     offspring[1].probD = self.population[index_pool[i+1]].probD
+                #     offspring[0].strat_name = self.population[index_pool[i+1]].strat_name
+                #     offspring[1].strat_name = self.population[index_pool[i+1]].strat_name
 
           
 
@@ -204,21 +210,23 @@ class GA ():
     def update(self,population, offspring, param = Parameters):
         #sort the population acording to the best fitness and append the tournament pool to the population 
         #firstly, sort the population
-        if param.SIGA_flag == "Yes":
-            sort_perm = sorted(population, key = attrgetter('totalFitness'))
-
-        #sort_perm = sorted(population, key = attrgetter('fitness'))
+ 
+        sort_perm = sorted(population, key = attrgetter('fitness'))
         #if its a minimization problem pick the least values
 
         sort_perm[param.popNum - param.tn_num:] = list(offspring)
+
+        if param.SIGA_flag== "Yes":
+            for i in range(len(sort_perm)):
+                sort_perm[i].socialFitness = 0
+                sort_perm[i].totalFitness = 0
+                
  
         return sort_perm
 
 
     #function to find the best element of the population
     def findBest(self, population, param = Parameters):
-        if param.SIGA_flag == "Yes":
-            best = min(population, key=attrgetter('totalFitness'))
         best = min(population, key=attrgetter('fitness'))
         return best
 
@@ -250,50 +258,56 @@ class GA ():
         if p.SIGA_flag == "Yes":
             gEngine = Interaction.Interaction(self.param)
 
-            #change the game payment matrix (if necessary)
-            gEngine.change(1)
+        #for k in range(len(population)):
+            #print(k,":", "Fit:", population[k].fitness, "Social:", population[k].socialFitness, "Total:", population[k].totalFitness)
 
         #main loop   
         for i in range(0, int(p.generations)):
-            gEngine.socialInteraction(self.findBest(population,p).fitness,self.population)
+            if p.SIGA_flag == "Yes": 
+                gEngine.socialInteraction(self.findBest(population,p).fitness,self.population)
+                for k in range(len(population)):
+                    population[k].totalFitness = self.calculateTotalFitness(population[k],p)
             #selection + crossover
+
 
             offspring = self.crossover(population,p)
 
+           
+            population = sorted(population, key = attrgetter('fitness'))
+
+
             #mutation
             #get index of individuals for mutation 
-            muta_index = random.sample(range(0, p.popNum), int(p.mutation_rate * p.popNum))
-            for k in range(0, len(muta_index)):
+            muta_index = random.sample(range(int(p.popNum*0.1), p.popNum), int(p.mutation_rate * p.popNum))
+            for k in muta_index:
                 population[k].genotype = self.mutation(population[k].genotype, p)
                 population[k].fitness = self.makespam(population[k].genotype, p)
 
-
             population = self.update(population, offspring, p)
-
-
             #print(g[len(g)-1].fitness, g[len(g)-1].genotype[0], g[len(g)-1].genotype[1])
             self.bests.append(copy.copy(self.findBest(population,p)))
 
             #storing information of the behavior of every individual
-            tmp_list = [0,0,0,0]
-            for ik in range(0, self.param.popNum):
-                if population[ik].strat_name == 'ALLC':
-                    tmp_list[0] +=1
-                elif population[ik].strat_name == 'ALLD':
-                    tmp_list[1] +=1
-                elif population[ik].strat_name == 'TFT':
-                    tmp_list[2] +=1
-                else:
-                    tmp_list[3] +=1
+            if p.SIGA_flag == "Yes": 
+                tmp_list = [0,0,0,0]
+                for ik in range(0, self.param.popNum):
+                    if population[ik].strat_name == 'ALLC':
+                        tmp_list[0] +=1
+                    elif population[ik].strat_name == 'ALLD':
+                        tmp_list[1] +=1
+                    elif population[ik].strat_name == 'TFT':
+                        tmp_list[2] +=1
+                    else:
+                        tmp_list[3] +=1
 
-            #print(tmp_list)
-            self.behavior_ind.append(tmp_list)
+                self.behavior_ind.append(tmp_list)
 
 
         
         #write result File
-        self.writeResult("Out/C|"+ str(self.param.machines) + "|" + str(self.param.jobs)+"/"+self.outname)
-        self.writeBehavior("Out/C|"+ str(self.param.machines) + "|" + str(self.param.jobs)+"/Behavior"+self.outname)
+        self.writeResult("Out/C|"+ str(self.param.machines) + "|" + str(self.param.jobs)+"x"+ str(self.param.popNum)+"/"+self.outname)
+        if p.SIGA_flag == "Yes": 
+            self.writeBehavior("Out/C|"+ str(self.param.machines) + "|" + str(self.param.jobs)+ "x"+ str(self.param.popNum)+ "/Behavior"+self.outname)
         b = min(self.bests, key = attrgetter('fitness'))
 
         #return best 

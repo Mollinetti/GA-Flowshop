@@ -44,15 +44,22 @@ class Gene():
         Gene.population +=1
 
     #model what kind of move will the player do
-    def play(self):
+    def play(self, memory = 'C'):
+        
+        if self.strat_name == "TFT":
+            if memory == "C":
+                return "C"
+            else:
+                return "D"
         #flip a coin
-        coin = random.random()
-        #C
-        if (coin >= 0 and coin < self.probC):
-            return "C"
-        #D
-        elif (coin >= self.probC and coin < 1):
-            return "D"
+        else:    
+            coin = random.random()
+            #C
+            if (coin >= 0 and coin < self.probC):
+                return "C"
+            #D
+            elif (coin >= self.probC and coin < 1):
+                return "D"
                 
     def traverse(self):
         print(self.genotype)

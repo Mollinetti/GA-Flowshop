@@ -16,7 +16,7 @@ class Interaction:
 		self.beta = 0.9
 		self.param = param
 		#batch size
-		self.batch_size = int(self.param.popNum * 0.5)
+		self.batch_size = int(self.param.popNum)
 		#starting payment matrix (original Dillema)
 		self.R = 3
 		self.T = 5
@@ -59,15 +59,19 @@ class Interaction:
 			self.P = 1
 		#update payoff
 		max_num = max(self.R, self.T, self.P, self.S)
-		for k in range(0,self.param.numRounds):
-			self.maximum_payoff += math.pow(self.beta,k+1)* max_num
+		for i in range(0, self.batch_size):
+			for k in range(0,self.param.numRounds):
+				self.maximum_payoff += math.pow(self.beta,k+1)* max_num
 	#standard game without any sthocasticity
 	def socialGame(self, bestval, p1 = Gene, p2 = Gene):
 		p1_socialFitness_temp = 0
 		p2_socialFitness_temp = 0
+		#player's memory start at C
+		p1_memory = "C"
+		p2_memory = "C"
 		for k in range(0,self.param.numRounds):
-			p1move = p1.play()
-			p2move = p2.play()
+			p1move = p1.play(p1_memory)
+			p2move = p2.play(p2_memory)
 			#model all possible moves (both C, both D, one D and one C)
 			#both cooperate
 			if(p1move == "C" and p2move == "C"):
@@ -85,6 +89,9 @@ class Interaction:
 			elif(p1move == "D" and p2move == "D"):
 				p1_socialFitness_temp+= math.pow(self.beta,k+1) * self.P
 				p2_socialFitness_temp+= math.pow(self.beta,k+1) * self.P
+
+			p1_memory = p2move
+			p2_memory = p1move
 
 		#calculate normalized fitness
 		p1normfit = (p1_socialFitness_temp / self.maximum_payoff) * bestval
@@ -117,9 +124,9 @@ class Interaction:
 
 			#population[index[i]].socialFitness, population[index[i+1]].socialFitness =self.socialGame(bestval, population[index[i]], population[index[i+1]])
     	#EACH INDIVIDUAL INTERACTS WITH A BATCH OF THE POPULATION, TO MAKE IT INTERACT WITH EVERYONE, SET BATCH_SIZE TO NUMPOP-1
-		for i in range(0, int(self.param.popNum)-1):
+		for i in range(0, len(index)):
 			#sort other players
-			players = random.sample(list(index[:i]+index[i:]),self.batch_size)
+			players = random.sample(index[:i]+index[i+1:],self.batch_size-1)
 			#iterate for the list
 			for j in range(0, len(players)):
 				#iterate for each game: 
